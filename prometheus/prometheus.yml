@@ -16,3 +16,10 @@ scrape_configs:
       - targets: [
           "node-exporter:9100"
         ]
+
+  - job_name: "gpu-export"
+    scrape_interval: 10s
+    static_configs:
+      - targets: [
+          "host.docker.internal:9400"
+        ]
