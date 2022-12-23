@@ -17,8 +17,32 @@ services:
     ports:
       - 21096:9100
   
+  nvidia-exporter:
+    image: nvcr.io/nvidia/k8s/dcgm-exporter
+    restart: always
+    environment:
+      - DCGM_EXPORTER_NO_HOSTNAME=1
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - "9400:9400"
+  
+  app-tong-lb:
+    build: nginx/
+    restart: always
+    network_mode: host
+    volumes:
+      - ./nginx/cert:/etc/nginx/ssl/live/aiserver.daotao.ai/:rw
+
+  app-teacher-lb:
+    build: nginx-teacher/
+    restart: always
+    network_mode: host
+    volumes:
+      - ./nginx/cert:/etc/nginx/ssl/live/aiserver.daotao.ai/:rw
+  
   prometheus:
-    image: lab-thay-linh:prometheus
+    build: prometheus/
     restart: always
     ports:
       - 9091:9090
@@ -32,5 +56,13 @@ services:
       - 10000:3000
     extra_hosts:
       - "host.docker.internal:host-gateway"
+  
+  certbot:
+    image: certbot/certbot:latest
+    network_mode: host 
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+
 volumes:
   exporter:
